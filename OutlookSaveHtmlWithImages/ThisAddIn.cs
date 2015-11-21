@@ -21,7 +21,7 @@ namespace OutlookSaveHtmlWithImages
 
         protected override Office.IRibbonExtensibility CreateRibbonExtensibilityObject()
         {
-            return new BackstageChanger();
+            return new BackstageOrOfficeMenuChanger();
         }
 
         #region VSTO generated code

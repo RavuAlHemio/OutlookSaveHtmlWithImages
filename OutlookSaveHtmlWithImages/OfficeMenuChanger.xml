@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="Ribbon_Load">
+  <ribbon>
+    <officeMenu>
+      <splitButton idMso="FileSaveAsMenu">
+        <menu>
+          <button id="saveHtmlWithImagesBtn" getVisible="IsVisible" getLabel="GetLabel" onAction="SaveHtmlWithImages" insertAfterMso="SaveAttachments" />
+        </menu>
+      </splitButton>
+    </officeMenu>
+  </ribbon>
+</customUI>
+

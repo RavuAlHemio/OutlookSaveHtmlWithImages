@@ -35,6 +35,7 @@ FunctionEnd
 
 ; constants
 !define OSHWIADDINREGPATH "SOFTWARE\Microsoft\Office\Outlook\Addins\RavuAlHemio.OutlookSaveHtmlWithImages"
+!define OSHWIADDINREG32PATH "SOFTWARE\Wow6432Node\Microsoft\Office\Outlook\Addins\RavuAlHemio.OutlookSaveHtmlWithImages"
 !define OSHWIUNINSTALLREGPATH "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\RavuAlHemio.OutlookSaveHtmlWithImages"
 !define OSHWISOURCEPATH "..\OutlookSaveHtmlWithImages\bin\Release\"
 
@@ -98,6 +99,14 @@ Section "!Outlook Save HTML With Images" SecOSHWI
   WriteRegDWORD HKLM "${OSHWIADDINREGPATH}" "LoadBehavior" 3
   WriteRegStr HKLM "${OSHWIADDINREGPATH}" "Manifest" "$INSTDIR\OutlookSaveHtmlWithImages.vsto|vstolocal"
   
+  ${If} ${RunningX64}
+    ; register with 32-bit Outlook too
+    WriteRegStr HKLM "${OSHWIADDINREG32PATH}" "FriendlyName" "Save HTML With Images"
+    WriteRegStr HKLM "${OSHWIADDINREG32PATH}" "Description" "Add-in that allows saving HTML e-mails, integrating external images into the HTML file."
+    WriteRegDWORD HKLM "${OSHWIADDINREG32PATH}" "LoadBehavior" 3
+    WriteRegStr HKLM "${OSHWIADDINREG32PATH}" "Manifest" "$INSTDIR\OutlookSaveHtmlWithImages.vsto|vstolocal"
+  ${EndIf}
+  
   ; register for uninstall
   WriteRegStr HKLM "${OSHWIUNINSTALLREGPATH}" "DisplayName" "Outlook Save HTML With Images"
   WriteRegStr HKLM "${OSHWIUNINSTALLREGPATH}" "InstallLocation" "$INSTDIR"
@@ -105,6 +114,18 @@ Section "!Outlook Save HTML With Images" SecOSHWI
   WriteRegStr HKLM "${OSHWIUNINSTALLREGPATH}" "QuietUninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
   WriteRegDWORD HKLM "${OSHWIUNINSTALLREGPATH}" "NoModify" 1
   WriteRegDWORD HKLM "${OSHWIUNINSTALLREGPATH}" "NoRepair" 1
+
+  ; make Office 2007 load machine-local add-ins
+  ClearErrors
+  EnumRegKey $0 HKLM "SOFTWARE\Microsoft\Office\12.0\Common\General" 0
+  IfErrors NoOffice2012
+  WriteRegDWORD HKLM "SOFTWARE\Microsoft\Office\12.0\Common\General" "EnableLocalMachineVSTO" 1
+NoOffice2012:
+  ClearErrors
+  EnumRegKey $0 HKLM "SOFTWARE\Wow6432Node\Microsoft\Office\12.0\Common\General" 0
+  IfErrors NoOffice2012x6432
+  WriteRegDWORD HKLM "SOFTWARE\Wow6432Node\Microsoft\Office\12.0\Common\General" "EnableLocalMachineVSTO" 1
+NoOffice2012x6432:
 SectionEnd
 
 ; descriptions
@@ -125,6 +146,7 @@ Section "Uninstall"
 
   ; unregister from Outlook
   DeleteRegKey HKLM "${OSHWIADDINREGPATH}"
+  DeleteRegKey HKLM "${OSHWIADDINREG32PATH}"
 
   ; addin DLL + manifest
   Delete "$INSTDIR\OutlookSaveHtmlWithImages.dll"

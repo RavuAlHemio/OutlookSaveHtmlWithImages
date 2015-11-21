@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using OutlookSaveHtmlWithImages.Properties;
 using Office = Microsoft.Office.Core;
 using Outlook = Microsoft.Office.Interop.Outlook;
@@ -24,19 +20,28 @@ using Outlook = Microsoft.Office.Interop.Outlook;
 namespace OutlookSaveHtmlWithImages
 {
     [ComVisible(true)]
-    public class BackstageChanger : Office.IRibbonExtensibility
+    public class BackstageOrOfficeMenuChanger : Office.IRibbonExtensibility
     {
-        private Office.IRibbonUI ribbon;
+        private Office.IRibbonUI _ribbon;
+        private bool? _hasBackstage;
 
-        public BackstageChanger()
+        public BackstageOrOfficeMenuChanger()
         {
+            _hasBackstage = null;
         }
 
         #region IRibbonExtensibility Members
 
         public string GetCustomUI(string ribbonID)
         {
-            return GetResourceText("OutlookSaveHtmlWithImages.BackstageChanger.xml");
+            if (!_hasBackstage.HasValue)
+            {
+                int officeMajorVersion = int.Parse(Globals.ThisAddIn.Application.Version.Split('.')[0]);
+                _hasBackstage = (officeMajorVersion > 12);
+            }
+            return _hasBackstage.Value
+                ? GetResourceText("OutlookSaveHtmlWithImages.BackstageChanger.xml")
+                : GetResourceText("OutlookSaveHtmlWithImages.OfficeMenuChanger.xml");
         }
 
         #endregion
@@ -108,7 +113,7 @@ namespace OutlookSaveHtmlWithImages
 
         public void Ribbon_Load(Office.IRibbonUI ribbonUI)
         {
-            this.ribbon = ribbonUI;
+            this._ribbon = ribbonUI;
         }
 
         #endregion
